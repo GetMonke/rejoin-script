@@ -1,89 +1,89 @@
 -- Auto Rejoin SAME GAME (not specific server) with countdown GUI
- 
-local TeleportService = gameGetService(TeleportService)
-local Players = gameGetService(Players)
-local UIS = gameGetService(UserInputService)
- 
+
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+
 local player = Players.LocalPlayer
- 
+
 -- SETTINGS
 local RejoinInterval = 30 -- seconds
- 
+
 -- GUI
-local screenGui = Instance.new(ScreenGui)
-screenGui.Name = AutoRejoinGameGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "AutoRejoinGameGui"
 screenGui.ResetOnSpawn = false
-screenGui.Parent = gameGetService(CoreGui)
- 
-local frame = Instance.new(Frame)
+screenGui.Parent = game:GetService("CoreGui")
+
+local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 220, 0, 100)
 frame.Position = UDim2.new(0.05, 0, 0.25, 0)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.Active = true
 frame.Parent = screenGui
- 
-local title = Instance.new(TextLabel)
+
+local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 25)
 title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-title.Text = Auto Rejoin Game
+title.Text = "Auto Rejoin Game"
 title.Font = Enum.Font.SourceSansBold
 title.TextSize = 18
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Parent = frame
- 
-local timerLabel = Instance.new(TextLabel)
+
+local timerLabel = Instance.new("TextLabel")
 timerLabel.Size = UDim2.new(1, 0, 0, 40)
 timerLabel.Position = UDim2.new(0, 0, 0, 30)
 timerLabel.BackgroundTransparency = 1
-timerLabel.Text = Next rejoin --
+timerLabel.Text = "Next rejoin: --"
 timerLabel.Font = Enum.Font.SourceSansBold
 timerLabel.TextSize = 20
 timerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 timerLabel.Parent = frame
- 
-local startStopBtn = Instance.new(TextButton)
+
+local startStopBtn = Instance.new("TextButton")
 startStopBtn.Size = UDim2.new(0, 100, 0, 28)
 startStopBtn.Position = UDim2.new(0, 10, 0, 70)
 startStopBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-startStopBtn.Text = Start
+startStopBtn.Text = "Start"
 startStopBtn.Font = Enum.Font.SourceSansBold
 startStopBtn.TextSize = 16
 startStopBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 startStopBtn.Parent = frame
- 
-local manualBtn = Instance.new(TextButton)
+
+local manualBtn = Instance.new("TextButton")
 manualBtn.Size = UDim2.new(0, 90, 0, 28)
 manualBtn.Position = UDim2.new(0, 120, 0, 70)
 manualBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-manualBtn.Text = Rejoin Now
+manualBtn.Text = "Rejoin Now"
 manualBtn.Font = Enum.Font.SourceSansBold
 manualBtn.TextSize = 16
 manualBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 manualBtn.Parent = frame
- 
+
 -- Dragging
 local dragging, dragInput, dragStart, startPos
- 
-title.InputBeganConnect(function(input)
+
+title.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		dragging = true
 		dragStart = input.Position
 		startPos = frame.Position
-		input.ChangedConnect(function()
+		input.Changed:Connect(function()
 			if input.UserInputState == Enum.UserInputState.End then
 				dragging = false
 			end
 		end)
 	end
 end)
- 
-title.InputChangedConnect(function(input)
+
+title.InputChanged:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseMovement then
 		dragInput = input
 	end
 end)
- 
-UIS.InputChangedConnect(function(input)
+
+UIS.InputChanged:Connect(function(input)
 	if input == dragInput and dragging then
 		local delta = input.Position - dragStart
 		frame.Position = UDim2.new(
@@ -92,38 +92,38 @@ UIS.InputChangedConnect(function(input)
 		)
 	end
 end)
- 
+
 -- Logic
 local enabled = false
- 
-startStopBtn.MouseButton1ClickConnect(function()
+
+startStopBtn.MouseButton1Click:Connect(function()
 	enabled = not enabled
 	if enabled then
-		startStopBtn.Text = Stop
+		startStopBtn.Text = "Stop"
 		startStopBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
 	else
-		startStopBtn.Text = Start
+		startStopBtn.Text = "Start"
 		startStopBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-		timerLabel.Text = Next rejoin --
+		timerLabel.Text = "Next rejoin: --"
 	end
 end)
- 
+
 local function rejoinGame()
 	pcall(function()
-		TeleportServiceTeleport(game.PlaceId, player)
+		TeleportService:Teleport(game.PlaceId, player)
 	end)
 end
- 
-manualBtn.MouseButton1ClickConnect(function()
+
+manualBtn.MouseButton1Click:Connect(function()
 	rejoinGame()
 end)
- 
+
 task.spawn(function()
 	while true do
 		if enabled then
 			for i = RejoinInterval, 1, -1 do
 				if not enabled then break end
-				timerLabel.Text = Next rejoin  .. i .. s
+				timerLabel.Text = "Next rejoin: " .. i .. "s"
 				task.wait(1)
 			end
 			if enabled then
@@ -134,4 +134,3 @@ task.spawn(function()
 		end
 	end
 end)
- 
